@@ -1,0 +1,2 @@
+
+The files in this directory can also be found in our [Temporal Cluster Matching repository](https://github.com/microsoft/temporal-cluster-matching) under the `predictions/` directory. These contain predictions for the construction dates of each poultry barn in the Soroka and Duren 2020 dataset.

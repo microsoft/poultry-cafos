@@ -1,0 +1,24 @@
+.vscode/
+__pycache__/
+.ipynb_checkpoints/
+*.npz
+
+# Where all the model training and inference results are stored
+output/
+
+## Tile index, these should be automatically downloaded by cafo.utils.NAIPTileIndex
+data/tmp/
+
+## List of all NAIP files, too large to add to git
+data/naip_blob_list.txt
+data/naip_*.csv
+data/naip_most_recent*/
+data/chesapeake-bay-counties*.geojson
+data/Delmarva_PL_House_Final2*.geojson
+
+## Files created by `postprocess.py`
+tmp/
+cache/
+
+## Runs
+data/runs/
