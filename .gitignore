@@ -16,6 +16,13 @@ data/naip_most_recent*/
 data/chesapeake-bay-counties*.geojson
 data/Delmarva_PL_House_Final2*.geojson
 
+## Ignore the training/test split CSVs
+data/splits/
+
+## Ignore the temp files created for generating the train/test-augment splits
+data/poultry_barn_change_predictions/*_train.geojson
+data/poultry_barn_change_predictions/*_test.geojson
+
 ## Files created by `postprocess.py`
 tmp/
 cache/

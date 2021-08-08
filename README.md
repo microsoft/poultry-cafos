@@ -11,7 +11,7 @@ If you make use of this implementation or data in your own project, or you want 
 
 <p align="center">
     <img src="figures/USA_map.png" width="800"/><br/>
-    <b>Figure 1.</b> A heatmap of predicted poultry barn density across the United States.
+    <b>Figure 1.</b> A heatmap of predicted poultry barn locations across the United States.
 </p>
 
 ## Setup
@@ -80,6 +80,9 @@ The "filtered predictions" are created following the method described in [Datase
 
 ## Model training and evaluation
 
+Our experiments can be reproduced with `python scripts/run_experiments.py`. This script will run `train.py` in parallel with a hyperparameter sweep. If you set `TEST_MODE=True` then the individual commands will be printed to STDOUT, allowing you to selectively run a subset of the experiments.
+
+The `scripts/run_test_inference_and_evaluation.py` script will use the model checkpoints (the best checkpoints according to validation metrics) from each experiment, run them on all of the imagery from the test set, and report tile level metrics in CSV files. Our results from this step can be found in `results/`.
 
 
 ## Dataset creation and filtering
