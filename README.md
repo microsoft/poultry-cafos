@@ -11,7 +11,7 @@ If you make use of this implementation or data in your own project, or you want 
 
 <p align="center">
     <img src="figures/USA_map.png" width="800"/><br/>
-    <b>Figure 1.</b> A heatmap of predicted poultry barn locations across the United States.
+    <b>Figure 1.</b> A heatmap of predicted poultry barn locations across the United States. Download these predictions <a href="https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered.gpkg">here</a>.
 </p>
 
 ## Setup
