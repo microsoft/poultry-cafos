@@ -84,6 +84,20 @@ Our experiments can be reproduced with `python scripts/run_experiments.py`. This
 
 The `scripts/run_test_inference_and_evaluation.py` script will use the model checkpoints (the best checkpoints according to validation metrics) from each experiment, run them on all of the imagery from the test set, and report tile level metrics in CSV files. Our results from this step can be found in `results/`.
 
+A notable result we find with our experiments is the importance of rotation augmentation:
+
+<p align="center">
+<img src="figures/predictions_no-rotation_1.png" width="800"><br/>
+<img src="figures/predictions_rotation_1.png" width="800"><br/>
+<b>Figure 2.</b> Predictions from models trained with and without rotation augmentation. These models exhibit similar validation and test perfomance as the distribution of building rotations is similar between training/validation/test, however rotation augmentation results in a model with stronger generalization performance.
+</p>
+
+Rotation augmentation is particularly important for our models as the poultry CAFOs in our labeled data are strongly biased to have north-south oriented barns:
+<p align="center">
+<img src="figures/rotation_distribution.png" width="500"><br/>
+<b>Figure 3.</b> Histogram of orientations of barns from the Soroka and Duren dataset.
+</p>
+
 
 ## Dataset creation and filtering
 
@@ -100,7 +114,7 @@ To create the dataset over the entire US we follow the same process, see `script
 For filtering out false positive predictions we use the distribution of _areas_ and _aspect ratios_ seen in the Soroka and Duren dataset (under the assumptions that all poultry barns will follow these distributions). The mean _area_ is 2477.18 m^2 with a standard deviation of 849.69 m^2 and a range of [525.69, 8106.53] m^2. The mean aspect ratio is 9.10 with a standard deviation of 1.72 and range of [3.4, 20.49].
 
 <p align="center">
-<img src="figures/area_distribution.png" width=400/><img src="figures/aspect_ratio_distribution.png" width=400/>
+<img src="figures/area_distribution.png" width="400"/><img src="figures/aspect_ratio_distribution.png" width="400"/>
 </p>
 
 Any prediction with a feature `rectangle_area` that falls outside of the [525.69, 8106.53] range, with a feature `rectangle_aspect_ratio` that falls outside of the [3.4, 20.49] range, or that has a `distance_to_nearest_road` of 0 is counted as a false positive and removed.
