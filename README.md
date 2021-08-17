@@ -63,11 +63,11 @@ The following are download links for our model and final generated datasets:
 
 - [Model weights (465 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/train-all_unet_0.5_0.01_rotation_best-checkpoint.pt)
 - Full USA predictions with latest 1m NAIP imagery per state:
-  - [All predictions (1.6 GB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021.gpkg) - 7,108,719 polygons
-  - [Filtered predictions (98 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered.gpkg) - 424,874 polygons
+  - [All predictions (2.5 GB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021.gpkg) - 7,108,719 polygons
+  - [Filtered predictions (150 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered.gpkg) - 424,874 polygons
 - Chesapeake Bay predictions with 2017/2018 NAIP imagery:
-  - [All predictions (116 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/chesapeake-bay-3-18-2021.gpkg) - 496,181 polygons
-  - [Filtered predictions (6 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/chesapeake-bay-3-18-2021_filtered.gpkg) - 26,284 polygons
+  - [All predictions (176 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/chesapeake-bay-3-18-2021.gpkg) - 496,181 polygons
+  - [Filtered predictions (10 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/chesapeake-bay-3-18-2021_filtered.gpkg) - 26,284 polygons
 
 Each polygon in the above datasets contains 5 features:
 - `p` - The averaged model predicted probability over all imagery pixels within the polygon.
@@ -75,6 +75,9 @@ Each polygon in the above datasets contains 5 features:
 - `area` - The area of just the positively predicted pixels under the polygon in square meters.
 - `rectangle_aspect_ratio` - The ratio of the polgon's long side to its short side.
 - `distance_to_nearest_road` - The distance from the polygon to the approximate nearest road from OpenStreetMap.
+- `year` - The year that the source NAIP imagery was captured.
+- `date` - The date that the source NAIP imagery was captured.
+- `image_url` - The URL to the source imagery that was used to create the prediction.
 
 The "filtered predictions" are created following the method described in [Dataset creation and filtering](#dataset-creation-and-filtering).
 
