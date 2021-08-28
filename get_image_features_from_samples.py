@@ -22,11 +22,11 @@ The two types of feature vectors that can be computed are:
 import argparse
 import os
 import time
+from collections import defaultdict
 
 import fiona
 import fiona.transform
 import numpy as np
-import pandas as pd
 import rasterio
 import rasterio.mask
 import shapely
@@ -34,7 +34,6 @@ import shapely.geometry
 import shapely.ops
 
 from cafo import utils
-from cafo.data.NAIPTileIndex import NAIPTileIndex
 
 os.environ.update(utils.RASTERIO_BEST_PRACTICES)
 
@@ -54,13 +53,6 @@ parser.add_argument(
     help="The output filename (should end with .npz)",
 )
 parser.add_argument(
-    "--url_list_fn",
-    type=str,
-    required=True,
-    help="Path to a CSV of imagery URLs to use (e.g. 'data/naip_most_recent_100cm.csv')."
-    + " We assume that this is a CSV file with a 'image_fn' column.",
-)
-parser.add_argument(
     "--feature_type",
     choices=["spectral-histograms", "cluster-histograms"],
     required=True,
@@ -72,53 +64,48 @@ parser.add_argument(
 args = parser.parse_args()
 
 
+def filter_urls(urls, valid_imagery_set):
+    for url in urls:
+        if url.split("/")[7] in valid_imagery_set:
+            return url
+    raise ValueError("No match")
+
+
 def main():
 
     assert os.path.exists(args.input_fn)
-    assert os.path.exists(args.url_list_fn)
     assert not os.path.exists(args.output_fn)
     assert args.output_fn.endswith(".npz")
-    assert args.url_list_fn.endswith(".csv")
 
     # Load all of the input samples
     prediction_shapes = []
     prediction_geoms = []
+    prediction_urls = []
     with fiona.open(args.input_fn) as f:
         for row in f:
             prediction_shapes.append(shapely.geometry.shape(row["geometry"]))
             prediction_geoms.append(row["geometry"])
+            prediction_urls.append(row["properties"]["image_url"])
+    for url in prediction_urls:
+        assert url.startswith("https://naipblobs.blob.core.windows.net")
 
     # Create a mapping between samples and imagery tiles. I.e. which samples belong to
     # which imagery tile. If we did not pre-compute this mapping, then this script would
     # be incredibly inefficient as it would requiring loading each imagery tile many
     # times.
-    index = NAIPTileIndex(base_path="../data/tmp/")
-
-    df = pd.read_csv(args.url_list_fn)
-    urls = set(df["image_fn"].values)
     # check to make sure that the URLs match up with what the NAIPTileIndex knows about
-    for url in urls:
-        assert url.startswith("https://naipblobs.blob.core.windows.net")
-    tiles_to_geom_idxs = {url: [] for url in urls}
+    tiles_to_geom_idxs = defaultdict(list)
     print("Computing sample to tile mapping")
-    for i, geom in enumerate(prediction_geoms):
+    for i, url in enumerate(prediction_urls):
         if i % 10000 == 0:
             print(f"{i / len(prediction_geoms) * 100:0.4f}%")
-        try:
-            url = list((set(index.lookup_geom(geom)) & urls))[0]
-            tiles_to_geom_idxs[url].append(i)
-        except IndexError:
-            shape = prediction_shapes[i]
-            lon = shape.centroid.x
-            lat = shape.centroid.y
-            url = list((set(index.lookup_point(lat, lon)) & urls))[0]
-            tiles_to_geom_idxs[url].append(i)
+        tiles_to_geom_idxs[url].append(i)
 
     # Compute features per sample
     if args.feature_type == "spectral-histograms":
-        histograms = np.zeros((len(prediction_shapes), 4, 256), dtype=np.int)
+        histograms = np.zeros((len(prediction_shapes), 4, 256), dtype=int)
     elif args.feature_type == "cluster-histograms":
-        histograms = np.zeros((len(prediction_shapes), 256), dtype=np.int)
+        histograms = np.zeros((len(prediction_shapes), 256), dtype=int)
 
     bad_indices = []
     count = 0
@@ -130,9 +117,7 @@ def main():
                 for geom_idx in geom_idxs:
 
                     geom = prediction_geoms[geom_idx]
-                    geom = fiona.transform.transform_geom(
-                        "epsg:4326", crs, utils.reverse_polygon_coordinates(dict(geom))
-                    )
+                    geom = fiona.transform.transform_geom("epsg:4326", crs, geom)
 
                     try:
                         out_image, _ = rasterio.mask.mask(

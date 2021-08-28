@@ -83,14 +83,25 @@ parser.add_argument(
 args = parser.parse_args()
 
 
+def fn_to_date(fn):
+    fn = os.path.basename(fn)
+    parts = fn.replace(".tif", "").split("_")
+    date = parts[-2]
+    year = date[:4]
+    month = date[4:6]
+    day = date[6:8]
+    return int(year), int(month), int(day)
+
+
 def postprocess_single_file(
-    fn, decision_threshold=127, road_step_size=50.0, num_nearest_neighbors=30
+    fn, url, decision_threshold=127, road_step_size=50.0, num_nearest_neighbors=30
 ):
     """Runs the postprocessing logic on a single GeoTIFF of predictions.
 
     Args:
         fn: Path to the filename to process -- assumed to have a single channel of
             'uint8' values that represent quantized per pixel probabilities.
+        url: Assosciated URL to the image pointed to by `fn`.
         decision_threshold: Threshold value in [0,255] at which a pixel is considered
             a positive prediction.
         road_step_size: The length of the segments that OSM road segments will be
@@ -107,7 +118,7 @@ def postprocess_single_file(
             data = f.read()
             mask = (data > decision_threshold).astype(np.uint8)
         else:
-            mask = f.read(1)
+            mask = f.read()
         profile = f.profile
 
         with MemoryFile() as memfile:
@@ -117,6 +128,8 @@ def postprocess_single_file(
                 features = list(
                     rasterio.features.dataset_features(g, 1, geographic=False)
                 )
+
+        year, month, day = fn_to_date(fn)
 
         for j in range(len(features)):
             del features[j]["properties"]
@@ -138,18 +151,22 @@ def postprocess_single_file(
                 "rectangle_area": shape_rectangle.area,
                 "area": shape.area,
                 "rectangle_aspect_ratio": aspect_ratio,
+                "image_url": url,
+                "year": year,
+                "date": f"{year}-{month}-{day}"
             }
 
             transformed_geom = fiona.transform.transform_geom(
                 src_crs, "epsg:4326", geom
             )
-            features[j]["geometry"] = utils.reverse_polygon_coordinates(
-                transformed_geom
-            )
+            features[j]["geometry"] = transformed_geom
+
+    if len(features) == 0:
+        return []
 
     # Run distance to nearest road calculations for every polygon we found
     empty = False
-    lats, lons = fiona.transform.transform(
+    lons, lats = fiona.transform.transform(
         src_crs, "epsg:4326", [left, right], [top, bottom]
     )
     north, south, east, west = lats[0], lats[1], lons[1], lons[0]
@@ -168,6 +185,8 @@ def postprocess_single_file(
     except osmnx.graph.EmptyOverpassResponse:
         empty = True
     except nx.NetworkXPointlessConcept:
+        empty = True
+    except UnboundLocalError:
         empty = True
     except ValueError:
         empty = True
@@ -239,9 +258,14 @@ def main():
     else:
         input_file_pattern = "_predictions-soft.tif"
 
+    for fn in fns:
+        assert fn.startswith("https://")
+
     # Calculate the paths to each file that we will be reading
     input_fns = []
+    input_urls = []
     for fn in fns:
+        input_urls.append(fn)
         if args.blob_root_dir is not None:
             input_fns.append(
                 fn.replace(utils.NAIP_BLOB_ROOT, args.blob_root_dir).replace(
@@ -260,14 +284,14 @@ def main():
     # Run postprocessing on all files
     all_features = []
     tic = time.time()
-    for i, fn in enumerate(input_fns):
+    for i, (fn, url) in enumerate(zip(input_fns, input_urls)):
         if i % 20 == 0:
             print(
                 "%d/%d files\t%0.2f seconds\t%d features processed"
                 % (i, len(fns), time.time() - tic, len(all_features))
             )
             tic = time.time()
-        features = postprocess_single_file(fn, decision_threshold=args.threshold)
+        features = postprocess_single_file(fn, url, decision_threshold=args.threshold)
         for feature in features:
             all_features.append(feature)
 
@@ -279,6 +303,9 @@ def main():
             "area": "float",
             "rectangle_aspect_ratio": "float",
             "distance_to_nearest_road": "float",
+            "year": "int",
+            "date": "str",
+            "image_url": "str"
         },
         "geometry": "Polygon",
     }
