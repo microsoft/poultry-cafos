@@ -15,6 +15,7 @@ data/naip_*.csv
 data/naip_most_recent*/
 data/chesapeake-bay-counties*.geojson
 data/Delmarva_PL_House_Final2*.geojson
+data/county_boundaries
 
 ## Ignore the training/test split CSVs
 data/splits/
@@ -29,3 +30,6 @@ cache/
 
 ## Runs
 data/runs/
+
+##
+scripts/mount*

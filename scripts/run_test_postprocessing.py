@@ -2,7 +2,7 @@
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 
-Runs the best model checkpoints over the test set and records performance.
+Runs postprocessing over model predictions on the test set.
 """
 import os
 import subprocess
@@ -15,12 +15,16 @@ commands = []
 for run in runs:
     model_fn = os.path.join(BASE_DIR, run, "best_checkpoint.pt")
     input_fn = "data/splits/test-single.csv"
-    output_fn = f"results/{run}.csv"
+    output_fn = f"output/inference/{run}.geojson"
+    input_dir = f"output/inference/{run}/"
 
-    commands.append(
-        f"python inference_and_evaluate.py --input_fn {input_fn}"
-        + f" --model_fn {model_fn} --output_fn {output_fn} --gpu {GPU}"
-    )
+    if not os.path.exists(output_fn):
+        commands.append(
+            f"python postprocess.py --input_fn {input_fn} --output_fn {output_fn}"
+            + f" --input_dir {input_dir}"
+        )
+    else:
+        print(f"{output_fn} already exists, skipping!")
 
 for i, command in enumerate(commands):
     print(f"{i}/{len(commands)}")
