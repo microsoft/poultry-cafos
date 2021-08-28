@@ -1,26 +1,29 @@
 name: cafo
 channels:
-  - pytorch
-  - defaults
+  - conda-forge
 dependencies:
-  - pytorch # pytorch dependencies
-  - torchvision
   - cudatoolkit=11.0
-  - python # python dependencies
-  - pip
-  - ipykernel
-  - rtree # geospatial dependencies
-  - shapely
   - fiona
-  - rasterio
-  - pyproj
   - gdal>3.0
-  - numpy # other dependencies
+  - ipykernel
   - matplotlib
-  - scikit-learn
-  - scikit-image
+  - numpy
+  - osmnx
   - pandas
+  - pip
+  - python
+  - pytorch
+  - rasterio
+  - rtree
+  - scikit-image
+  - scikit-learn
+  - shapely
+  - torchvision
   - pip:
-    - osmnx
-    - segmentation-models-pytorch
+    - black>=21.4b0
+    - flake8>=3.8
+    - isort[colors]>=5.8
+    - mypy>=0.900
+    - parse
+    - segmentation-models-pytorch>=0.2
     - tensorboard
