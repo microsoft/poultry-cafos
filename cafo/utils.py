@@ -214,32 +214,3 @@ def get_side_lengths(shape):
         lengths.append(distance(pts[i], pts[i + 1]))
     assert len(lengths) == 4
     return sorted(lengths)
-
-
-def reverse_polygon(polygon):
-    new_coords = []
-    if len(polygon[0][0]) == 2:
-        for ring in polygon:
-            new_ring = []
-            for x, y in ring:
-                new_ring.append((y, x))
-            new_coords.append(new_ring)
-    else:
-        for ring in polygon:
-            new_ring = []
-            for x, y, z in ring:
-                new_ring.append((y, x))
-            new_coords.append(new_ring)
-    return new_coords
-
-
-def reverse_polygon_coordinates(geom):
-    if geom["type"] == "MultiPolygon":
-        new_coords = []
-        for polygon in geom["coordinates"]:
-            new_polygon = reverse_polygon(polygon)
-            new_coords.append(new_polygon)
-    elif geom["type"] == "Polygon":
-        new_coords = reverse_polygon(geom["coordinates"])
-    geom["coordinates"] = new_coords
-    return geom

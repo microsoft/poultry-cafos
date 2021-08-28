@@ -15,7 +15,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from azureml.core import Run
 from skimage.transform import rotate
 
 from cafo import models, utils
@@ -320,6 +319,7 @@ def main():
         os.makedirs(args.output_dir, exist_ok=True)
 
     if args.azureml:
+        from azureml.core import Run
         run = Run.get_context()
 
     np.random.seed(args.seed)
