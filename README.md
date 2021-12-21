@@ -7,7 +7,10 @@ Specifically, we train and evaluate semantic segmentation models with labels fro
 We also develop a post-processing step to filter out false positive predictions at the facility level.
 Finally, we release our best trained model, two generated datasets of predicted poultry barns -- one across the entire United States with the latest 1m imagery per state, and another in the Chesapeake Bay with 2017/2018 imagery -- and a validation of our results.
 
-If you make use of this implementation or data in your own project, or you want to refer to it in a scientific publication, please consider citing this GitHub repository.
+If you make use of this implementation or data in your own project, or you want to refer to it in a scientific publication, **please consider referencing this GitHub repository and citing our paper: link coming soon**:
+```
+bibtex coming soon
+```
 
 <p align="center">
     <img src="figures/USA_map.jpg" width="800"/><br/>
@@ -113,11 +116,6 @@ To create the dataset over the entire US we follow the same process, see `script
 ### Filtering
 
 For filtering out false positive predictions we use the distribution of _areas_ and _aspect ratios_ seen in the Soroka and Duren dataset (under the assumptions that all poultry barns will follow these distributions). The mean _area_ is 2477.18 m^2 with a standard deviation of 849.69 m^2 and a range of [525.69, 8106.53] m^2. The mean aspect ratio is 9.10 with a standard deviation of 1.72 and range of [3.4, 20.49].
-
-<p align="center">
-<img src="figures/area_distribution.png" width="400"/><img src="figures/aspect_ratio_distribution.png" width="400"/><br/>
-<b>Figure 4.</b> Distribution of the areas and aspect ratios of barns from the Soroka and Duren dataset.
-</p>
 
 Any prediction with a feature `rectangle_area` that falls outside of the [525.69, 8106.53] range, with a feature `rectangle_aspect_ratio` that falls outside of the [3.4, 20.49] range, or that has a `distance_to_nearest_road` of 0 is counted as a false positive and removed.
 
