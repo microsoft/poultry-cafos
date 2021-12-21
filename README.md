@@ -10,8 +10,8 @@ Finally, we release our best trained model, two generated datasets of predicted 
 If you make use of this implementation or data in your own project, or you want to refer to it in a scientific publication, please consider citing this GitHub repository.
 
 <p align="center">
-    <img src="figures/USA_map.png" width="800"/><br/>
-    <b>Figure 1.</b> A heatmap of predicted poultry barn locations across the United States. Download these predictions <a href="https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered.gpkg">here</a>.
+    <img src="figures/USA_map.jpg" width="800"/><br/>
+    <b>Figure 1.</b> A heatmap of predicted poultry barn locations across the United States. Download these predictions <a href="https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered_deduplicated.gpkg">here</a>.
 </p>
 
 ## Setup
@@ -54,9 +54,6 @@ ogr2ogr -of GeoJSON -t_srs epsg:26918 Delmarva_PL_House_Final2_epsg26918.geojson
 Copy the three generated files, `Delmarva_PL_House_Final2_epsg4326.geojson`, `Delmarva_PL_House_Final2_epsg32618.geojson`, and `Delmarva_PL_House_Final2_epsg26918.geojson` to the `data/` directory in this repository.
 
 
-
-
-
 ## Dataset and pretrained models
 
 The following are download links for our model and final generated datasets:
@@ -65,11 +62,12 @@ The following are download links for our model and final generated datasets:
 - Full USA predictions with latest 1m NAIP imagery per state:
   - [All predictions (2.5 GB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021.gpkg) - 7,108,719 polygons
   - [Filtered predictions (150 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered.gpkg) - 424,874 polygons
+  - [Filtered (deduplicated) predictions (128 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered_deduplicated.gpkg) - 360,857 polygons
 - Chesapeake Bay predictions with 2017/2018 NAIP imagery:
   - [All predictions (176 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/chesapeake-bay-3-18-2021.gpkg) - 496,181 polygons
   - [Filtered predictions (10 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/chesapeake-bay-3-18-2021_filtered.gpkg) - 26,284 polygons
 
-Each polygon in the above datasets contains 5 features:
+Each polygon in the above datasets contains 8 features:
 - `p` - The averaged model predicted probability over all imagery pixels within the polygon.
 - `rectangle_area` - The area of the entire polygon in square meters.
 - `area` - The area of just the positively predicted pixels under the polygon in square meters.
@@ -79,7 +77,7 @@ Each polygon in the above datasets contains 5 features:
 - `date` - The date that the source NAIP imagery was captured.
 - `image_url` - The URL to the source imagery that was used to create the prediction.
 
-The "filtered predictions" are created following the method described in [Dataset creation and filtering](#dataset-creation-and-filtering).
+The "filtered and filtered (deduplicated) predictions" are created following the method described in [Dataset creation and filtering](#dataset-creation-and-filtering).
 
 ## Model training and evaluation
 
@@ -122,6 +120,18 @@ For filtering out false positive predictions we use the distribution of _areas_ 
 </p>
 
 Any prediction with a feature `rectangle_area` that falls outside of the [525.69, 8106.53] range, with a feature `rectangle_aspect_ratio` that falls outside of the [3.4, 20.49] range, or that has a `distance_to_nearest_road` of 0 is counted as a false positive and removed.
+
+Any prediction with a feature `rectangle_area` that falls outside of the [525.69, 8106.53] range, with a feature `rectangle_aspect_ratio` that falls outside of the [3.4, 20.49] range, or that has a `distance_to_nearest_road` of 0 is counted as a false positive and removed.
+
+<p align="center">
+<img src="figures/area_distribution.png" width="400"/><img src="figures/aspect_ratio_distribution.png" width="400"/><br/>
+<b>Figure 4.</b> Distribution of the areas and aspect ratios of barns from the Soroka and Duren dataset.
+</p>
+
+### Deduplication
+
+The NAIP tiles that we perform inference over have overlap between adjacent tiles. As such, some barns are duplicated in the raw set of predictions if they fall in these overlapping areas.
+To fix this, our final post-processing step is to merge overlapping predictions (i.e. to deduplicate predictions in the dataset). To do this, we iteratively merge overlapping polygons keeping the attributes of the largest. For the filtered "Full USA" set of predictions, this reduces the final number of predictions from 424,874 to 360,857 polygons.
 
 
 ## External data licensing
