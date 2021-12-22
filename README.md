@@ -7,7 +7,7 @@ Specifically, we train and evaluate semantic segmentation models with labels fro
 We also develop a post-processing step to filter out false positive predictions at the barn level.
 Finally, we release our best trained model, two generated datasets of predicted poultry barns -- one across the entire United States with the latest 1m imagery per state, and another in the Chesapeake Bay with 2017/2018 imagery -- and a validation of our results.
 
-If you make use of this implementation or data in your own project, or you want to refer to it in a scientific publication, **please consider referencing this GitHub repository and citing our [paper](https://arxiv.org/pdf/2112.10988.pdf):
+If you make use of this implementation or data in your own project, or you want to refer to it in a scientific publication, **please consider referencing this GitHub repository and citing our [paper](https://arxiv.org/pdf/2112.10988.pdf)**:
 ```
 @article{robinson2021Mapping,
   title={Mapping industrial poultry operations at scale with deep learning and aerial imagery},
