@@ -2,14 +2,19 @@
 
 **Jump to: [Setup](#setup) | [Dataset and pretrained models](#dataset-and-pretrained-models) | [Model training and evaluation](#model-training-and-evaluation) | [Dataset creation and filtering](#dataset-creation-and-filtering)**
 
-This repo contains code for training, evaluating, and running deep learning models for detecting poultry barns from high-resolution aerial imagery as well as a US-wide datasets of predicted poultry barn locations.
+This repo contains code for training, evaluating, and running deep learning models for detecting poultry barns from high-resolution aerial imagery as well as a US-wide datasets of predicted poultry barn locations to accompany the paper ["Mapping industrial poultry operations at scale with deep learning and aerial imagery"](https://arxiv.org/pdf/2112.10988.pdf).
 Specifically, we train and evaluate semantic segmentation models with labels from the [Soroka and Duren dataset of poultry barns](https://www.sciencebase.gov/catalog/item/5e0a3fcde4b0b207aa0d794e) over the [Delmarva Peninsula](https://en.wikipedia.org/wiki/Delmarva_Peninsula) and aerial imagery from the [National Agriculture Imagery Program (NAIP)](https://www.fsa.usda.gov/programs-and-services/aerial-photography/imagery-programs/naip-imagery/index), then run our best models over large amounts of NAIP imagery to create datasets of poultry barn locations.
-We also develop a post-processing step to filter out false positive predictions at the facility level.
+We also develop a post-processing step to filter out false positive predictions at the barn level.
 Finally, we release our best trained model, two generated datasets of predicted poultry barns -- one across the entire United States with the latest 1m imagery per state, and another in the Chesapeake Bay with 2017/2018 imagery -- and a validation of our results.
 
-If you make use of this implementation or data in your own project, or you want to refer to it in a scientific publication, **please consider referencing this GitHub repository and citing our paper: link coming soon**:
+If you make use of this implementation or data in your own project, or you want to refer to it in a scientific publication, **please consider referencing this GitHub repository and citing our [paper](https://arxiv.org/pdf/2112.10988.pdf):
 ```
-bibtex coming soon
+@article{robinson2021Mapping,
+  title={Mapping industrial poultry operations at scale with deep learning and aerial imagery},
+  author={Robinson, Caleb and Chugg, Ben and Anderson, Brandon and Ferres, Juan M Lavista and Ho, Daniel E},
+  journal={arXiv preprint arXiv:2112.10988},
+  year={2021}
+}
 ```
 
 <p align="center">
