@@ -116,7 +116,7 @@ parser.add_argument(
 parser.add_argument(
     "--model",
     default="unet",
-    choices=("unet", "unet-large", "fcn"),
+    choices=("unet", "manet", "unet++", "deeplabv3+"),
     help="Model to use",
 )
 parser.add_argument(
@@ -146,7 +146,6 @@ def joint_transform(img, labels):
         rotate_amount = np.random.randint(0, 360)
         img = rotate(img, rotate_amount)
         labels = rotate(labels, rotate_amount, order=0)
-        labels = (labels * 255).astype(np.uint8)
 
         img = img[
             CROP_POINT : CROP_POINT + CHIP_SIZE, CROP_POINT : CROP_POINT + CHIP_SIZE
@@ -156,6 +155,7 @@ def joint_transform(img, labels):
         ]
     else:
         img = img / 255.0
+
 
         img = img[
             CROP_POINT : CROP_POINT + CHIP_SIZE, CROP_POINT : CROP_POINT + CHIP_SIZE
@@ -348,18 +348,18 @@ def main():
 
     # Load input data
     validation_image_fns = [
-        "naip/v002/de/2011/de_100cm_2011/38075/m_3807505_ne_18_1_20110602.tif",
-        "naip/v002/de/2013/de_100cm_2013/38075/m_3807505_ne_18_1_20130915.tif",
-        "naip/v002/de/2015/de_100cm_2015/38075/m_3807505_ne_18_1_20150629.tif",
-        "naip/v002/de/2017/de_100cm_2017/38075/m_3807505_ne_18_1_20170720.tif",
-        "naip/v002/de/2018/de_060cm_2018/38075/m_3807505_ne_18_060_20180827.tif",
+        "https://landcover.blob.core.windows.net/poultry/naip/v002/de/2011/de_100cm_2011/38075/m_3807505_ne_18_1_20110602.tif",
+        "https://landcover.blob.core.windows.net/poultry/naip/v002/de/2013/de_100cm_2013/38075/m_3807505_ne_18_1_20130915.tif",
+        "https://landcover.blob.core.windows.net/poultry/naip/v002/de/2015/de_100cm_2015/38075/m_3807505_ne_18_1_20150629.tif",
+        "https://landcover.blob.core.windows.net/poultry/naip/v002/de/2017/de_100cm_2017/38075/m_3807505_ne_18_1_20170720.tif",
+        "https://landcover.blob.core.windows.net/poultry/naip/v002/de/2018/de_060cm_2018/38075/m_3807505_ne_18_060_20180827.tif",
     ]
     validation_label_fns = [
-        "train-augment/v002/de/2011/de_100cm_2011/38075/m_3807505_ne_18_1_20110602.tif",
-        "train-augment/v002/de/2013/de_100cm_2013/38075/m_3807505_ne_18_1_20130915.tif",
-        "train-augment/v002/de/2015/de_100cm_2015/38075/m_3807505_ne_18_1_20150629.tif",
-        "train-augment/v002/de/2017/de_100cm_2017/38075/m_3807505_ne_18_1_20170720.tif",
-        "train-augment/v002/de/2018/de_060cm_2018/38075/m_3807505_ne_18_060_20180827.tif",
+        "https://landcover.blob.core.windows.net/poultry/train-augment/v002/de/2011/de_100cm_2011/38075/m_3807505_ne_18_1_20110602.tif",
+        "https://landcover.blob.core.windows.net/poultry/train-augment/v002/de/2013/de_100cm_2013/38075/m_3807505_ne_18_1_20130915.tif",
+        "https://landcover.blob.core.windows.net/poultry/train-augment/v002/de/2015/de_100cm_2015/38075/m_3807505_ne_18_1_20150629.tif",
+        "https://landcover.blob.core.windows.net/poultry/train-augment/v002/de/2017/de_100cm_2017/38075/m_3807505_ne_18_1_20170720.tif",
+        "https://landcover.blob.core.windows.net/poultry/train-augment/v002/de/2018/de_060cm_2018/38075/m_3807505_ne_18_060_20180827.tif",
     ]
 
     if args.training_set == "train-all":
@@ -407,7 +407,7 @@ def main():
         train_dataset,
         batch_size=args.batch_size,
         num_workers=NUM_WORKERS,
-        pin_memory=True,
+        pin_memory=False,
     )
 
     num_training_batches_per_epoch = int(
@@ -422,10 +422,12 @@ def main():
     # Setup training
     if args.model == "unet":
         model = models.get_unet()
-    elif args.model == "fcn":
+    elif args.model == "unet++":
         model = models.get_fcn()
-    elif args.model == "unet-large":
-        model = models.get_unet_large()
+    elif args.model == "manet":
+        model = models.get_manet()
+    elif args.model == "deeplabv3+":
+        model = models.get_deeplab()
     else:
         raise ValueError("Invalid model")
 

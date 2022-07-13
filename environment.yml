@@ -12,7 +12,7 @@ dependencies:
   - pandas
   - pip
   - python
-  - pytorch
+  - pytorch-gpu
   - rasterio
   - rtree
   - scikit-image

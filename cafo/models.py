@@ -61,6 +61,34 @@ def get_unet_large():
         classes=2,
     )
 
+def get_deeplab():
+    return smp.DeepLabV3Plus(
+        encoder_name="resnet18",
+        in_channels=4,
+        classes=2,
+    )
+
+def get_unetplusplus():
+    return smp.UnetPlusPlus(
+        encoder_name="resnet18",
+        in_channels=4,
+        classes=2,
+    )
+
+def get_manet():
+    return smp.MAnet(
+        encoder_name="resnet18",
+        in_channels=4,
+        classes=2,
+    )
+
+def get_unet2():
+    return smp.Unet(
+        encoder_name="resnet18",
+        in_channels=4,
+        classes=2,
+    )
+
 
 def get_fcn():
     return FCN(num_input_channels=4, num_output_classes=2, num_filters=64)

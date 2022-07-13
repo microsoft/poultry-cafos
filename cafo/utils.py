@@ -22,7 +22,7 @@ RASTERIO_BEST_PRACTICES = dict(
     VSI_CURL_CACHE_SIZE="200000000",
 )
 
-NAIP_BLOB_ROOT = "https://naipblobs.blob.core.windows.net/naip"
+NAIP_BLOB_ROOT = "https://naipeuwest.blob.core.windows.net/naip"
 LOGGER = logging.getLogger("main")
 
 
@@ -85,7 +85,7 @@ def fit(model, device, data_loader, num_batches, optimizer, criterion, epoch, me
     losses = []
     tic = time.time()
     for batch_idx, (data, targets) in enumerate(data_loader):
-        if batch_idx % 10 == 0:
+        if batch_idx % 100 == 0:
             elapsed_time = time.time() - tic
             remaining_time = (
                 (elapsed_time / (batch_idx + 1)) * num_batches
@@ -101,11 +101,14 @@ def fit(model, device, data_loader, num_batches, optimizer, criterion, epoch, me
         targets = targets.to(device)
 
         optimizer.zero_grad()
-        outputs = model(data)
-        loss = criterion(outputs, targets)
-        losses.append(loss.item())
-        loss.backward()
-        optimizer.step()
+        try:
+            outputs = model(data)
+            loss = criterion(outputs, targets)
+            losses.append(loss.item())
+            loss.backward()
+            optimizer.step()
+        except ValueError as e:
+            print(e, data.shape, targets.shape)
 
     avg_loss = np.mean(losses)
 

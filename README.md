@@ -24,10 +24,10 @@ If you make use of this implementation or data in your own project, or you want 
 
 ## Setup
 
-First, run the following commands to create a conda environment, "poultry", with the necessary dependencies for running the scripts and notebooks in this repository:
+First, run the following commands to create a conda environment, "cafo", with the necessary dependencies for running the scripts and notebooks in this repository:
 ```bash
 conda env create -f environment.yml
-conda activate poultry
+conda activate cafo
 ```
 
 Next, follow the instructions in the following sub-sections to set up the different datasets.
@@ -53,7 +53,7 @@ mv naip_blob_list.txt data/
 
 Download the `Delmarva_PL_House_Final.zip` file from the Soroka and Duren 2020 *Poultry barn* dataset from [here](https://www.sciencebase.gov/catalog/item/5e0a3fcde4b0b207aa0d794e). From the unzipped directory run:
 ```
-conda activate poultry
+conda activate cafo
 ogr2ogr -of GeoJSON -t_srs epsg:4326 Delmarva_PL_House_Final2_epsg4326.geojson Delmarva_PL_House_Final2.shp
 ogr2ogr -of GeoJSON -t_srs epsg:32618 Delmarva_PL_House_Final2_epsg32618.geojson Delmarva_PL_House_Final2.shp
 ogr2ogr -of GeoJSON -t_srs epsg:26918 Delmarva_PL_House_Final2_epsg26918.geojson Delmarva_PL_House_Final2.shp

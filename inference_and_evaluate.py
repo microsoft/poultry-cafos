@@ -57,9 +57,11 @@ parser.add_argument(
     action="store_true",
     help="Flag for overwriting `output_fn` if that directory already exists",
 )
-
 parser.add_argument(
-    "--model", default="unet", choices=("unet", "fcn"), help="Model to use"
+    "--model",
+    default="unet",
+    choices=("unet", "manet", "unet++", "deeplabv3+"),
+    help="Model to use",
 )
 
 args = parser.parse_args()
@@ -101,8 +103,12 @@ def main():
 
     if args.model == "unet":
         model = models.get_unet()
-    elif args.model == "fcn":
+    elif args.model == "unet++":
         model = models.get_fcn()
+    elif args.model == "manet":
+        model = models.get_manet()
+    elif args.model == "deeplabv3+":
+        model = models.get_deeplab()
     else:
         raise ValueError("Invalid model")
     model.load_state_dict(torch.load(args.model_fn)["model_checkpoint"])

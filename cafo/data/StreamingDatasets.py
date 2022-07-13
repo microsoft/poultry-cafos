@@ -168,6 +168,12 @@ class StreamingGeospatialDataset(IterableDataset):
 
                     img, labels = self.sample_transform(img, labels)
 
+                    if img.shape[0] != 4 or img.shape[1] != 256 or img.shape[2] != 256 or labels.shape[0] != 256 or labels.shape[1] != 256:
+                        #img = torch.zeros(4,256,256).double()
+                        #labels = torch.zeros(256,256).long()
+                        print("Error", img.shape, labels.shape, img_fn, x, y)
+                        continue
+
                     # Note, that img should be a torch "Double" type (i.e. a np.float32)
                     # and labels should be a torch "Long" type (i.e. np.int64)
                     yield img, labels
