@@ -19,7 +19,7 @@ If you make use of this implementation or data in your own project, or you want 
 
 <p align="center">
     <img src="figures/USA_map.jpg" width="800"/><br/>
-    <b>Figure 1.</b> A heatmap of predicted poultry barn locations across the United States. Download these predictions <a href="https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered_deduplicated.gpkg">here</a>.
+    <b>Figure 1.</b> A heatmap of predicted poultry barn locations across the United States. Download these predictions <a href="https://opendata.aiforgood.ai/poultry-cafo/full-usa-3-13-2021_filtered_deduplicated.gpkg">here</a>.
 </p>
 
 ## Setup
@@ -66,14 +66,14 @@ Copy the three generated files, `Delmarva_PL_House_Final2_epsg4326.geojson`, `De
 
 The following are download links for our model and final generated datasets:
 
-- [Model weights (465 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/train-all_unet_0.5_0.01_rotation_best-checkpoint.pt)
+- [Model weights (465 MB)](https://opendata.aiforgood.ai/poultry-cafo/train-all_unet_0.5_0.01_rotation_best-checkpoint.pt)
 - Full USA predictions with latest 1m NAIP imagery per state:
-  - [All predictions (2.5 GB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021.gpkg) - 7,108,719 polygons
-  - [Filtered predictions (150 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered.gpkg) - 424,874 polygons
-  - [Filtered (deduplicated) predictions (128 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/full-usa-3-13-2021_filtered_deduplicated.gpkg) - 360,857 polygons
+  - [All predictions (2.5 GB)](https://opendata.aiforgood.ai/poultry-cafo/full-usa-3-13-2021.gpkg) - 7,108,719 polygons
+  - [Filtered predictions (150 MB)](https://opendata.aiforgood.ai/poultry-cafo/full-usa-3-13-2021_filtered.gpkg) - 424,874 polygons
+  - [Filtered (deduplicated) predictions (128 MB)](https://opendata.aiforgood.ai/poultry-cafo/full-usa-3-13-2021_filtered_deduplicated.gpkg) - 360,857 polygons
 - Chesapeake Bay predictions with 2017/2018 NAIP imagery:
-  - [All predictions (176 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/chesapeake-bay-3-18-2021.gpkg) - 496,181 polygons
-  - [Filtered predictions (10 MB)](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/chesapeake-bay-3-18-2021_filtered.gpkg) - 26,284 polygons
+  - [All predictions (176 MB)](https://opendata.aiforgood.ai/poultry-cafo/chesapeake-bay-3-18-2021.gpkg) - 496,181 polygons
+  - [Filtered predictions (10 MB)](https://opendata.aiforgood.ai/poultry-cafo/chesapeake-bay-3-18-2021_filtered.gpkg) - 26,284 polygons
 
 Each polygon in the above datasets contains 8 features:
 - `p` - The averaged model predicted probability over all imagery pixels within the polygon.
@@ -112,7 +112,7 @@ Rotation augmentation is particularly important for our models as the poultry CA
 
 ### Creation
 
-To create the Chesapeake Bay dataset for example, first, download the [model weights](https://researchlabwuopendata.blob.core.windows.net/poultry-cafo/train-all_unet_0.5_0.01_rotation_best-checkpoint.pt) to `output/train-all_unet_0.5_0.01_rotation_best-checkpoint.pt`.
+To create the Chesapeake Bay dataset for example, first, download the [model weights](https://opendata.aiforgood.ai/poultry-cafo/train-all_unet_0.5_0.01_rotation_best-checkpoint.pt) to `output/train-all_unet_0.5_0.01_rotation_best-checkpoint.pt`.
 Then, run the model over all NAIP imagery in the Chesapeake bay - `python scripts/run_chesapeake-bay-3-18-2021_inference.py`.
 Finally, run the post-processing pipeline over the model's per-pixel predictions - `bash scripts/run_chesapeake-bay-3-18-2021_postprocessing.sh` - resulting in a set of polygons with features that can be used to filter false positives as described below.
 
