@@ -91,7 +91,7 @@ def main():
         parsed_url = urlparse(url)
         if (
             parsed_url.scheme != "https"
-            or parsed_url.hostname != "naipblobs.blob.core.windows.net"
+            or parsed_url.hostname != urlparse(utils.NAIP_BLOB_ROOT).hostname
         ):
             raise ValueError(f"Unexpected image URL: {url}")
 

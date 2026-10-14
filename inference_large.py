@@ -95,7 +95,9 @@ def main():
     else:
         raise ValueError("Invalid model")
     model.load_state_dict(
-        torch.load(args.model_fn, map_location="cpu")["model_checkpoint"]
+        torch.load(args.model_fn, map_location="cpu", weights_only=True)[
+            "model_checkpoint"
+        ]
     )
     model = model.eval().to(device)
 
