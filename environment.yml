@@ -2,7 +2,6 @@ name: cafo
 channels:
   - conda-forge
 dependencies:
-  - cudatoolkit=11.0
   - fiona
   - gdal>3.0
   - ipykernel
@@ -11,6 +10,7 @@ dependencies:
   - osmnx
   - pandas
   - pip
+  - pystac-client
   - python
   - pytorch-gpu
   - rasterio

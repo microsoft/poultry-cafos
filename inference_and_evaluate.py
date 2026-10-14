@@ -111,7 +111,9 @@ def main():
         model = models.get_deeplab()
     else:
         raise ValueError("Invalid model")
-    model.load_state_dict(torch.load(args.model_fn)["model_checkpoint"])
+    model.load_state_dict(
+        torch.load(args.model_fn, weights_only=True)["model_checkpoint"]
+    )
     model = model.to(device)
 
     # Run model on all files and save output

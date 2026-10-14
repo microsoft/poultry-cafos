@@ -6,9 +6,6 @@ __pycache__/
 # Where all the model training and inference results are stored
 output/
 
-## Tile index, these should be automatically downloaded by cafo.utils.NAIPTileIndex
-data/tmp/
-
 ## List of all NAIP files, too large to add to git
 data/naip_blob_list.txt
 data/naip_*.csv

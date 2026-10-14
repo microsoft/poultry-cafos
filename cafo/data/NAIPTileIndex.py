@@ -2,48 +2,59 @@
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 """
-import os
-import pickle
-import urllib.request
 
-import rtree
-import shapely
+import math
+
+import numpy as np
+import pystac_client
+import shapely.geometry
 
 
 class NAIPTileIndex:
-    """Utility class for performing NAIP tile lookups by location"""
+    """Utility class for performing NAIP tile lookups by location with the Microsoft
+    Planetary Computer STAC API.
 
-    NAIP_BLOB_ROOT = "https://naipblobs.blob.core.windows.net/naip/"
-    NAIP_INDEX_BLOB_ROOT = "https://naipblobs.blob.core.windows.net/naip-index/rtree/"
-    INDEX_FNS = ["tile_index.dat", "tile_index.idx", "tiles.p"]
+    Tile footprints are requested one `CELL_SIZE` x `CELL_SIZE` degree cell at a time
+    and cached in memory, so repeated lookups in the same area only query the API once.
+    """
 
-    def __init__(self, base_path, verbose=False):
-        """Loads the tile index into memory (~400 MB) for use by `self.lookup()`.
+    STAC_API_URL = "https://planetarycomputer.microsoft.com/api/stac/v1"
+    COLLECTION = "naip"
+    CELL_SIZE = 1.0
 
-        Downloads the index files from the blob container if they do not exist in the
-        `base_path/` directory.
+    def __init__(self):
+        self.catalog = pystac_client.Client.open(NAIPTileIndex.STAC_API_URL)
+        self.cells = {}
 
-        Args:
-            base_path (str): The path on the local system to look for/store the three
-                files that make up the tile index. This path will be created if it
-                doesn't exist.
-            verbose (bool): Whether to be verbose when downloading the tile index files
+    def _get_cell(self, x, y):
+        """Returns the URLs, footprints, and footprint bounds of all NAIP tiles that
+        intersect the cell containing the (`x`, `y`) point.
         """
-
-        # Download the index files if it doens't exist
-        if not os.path.exists(base_path):
-            os.makedirs(base_path)
-        for fn in NAIPTileIndex.INDEX_FNS:
-            if not os.path.exists(os.path.join(base_path, fn)):
-                download_url(
-                    NAIPTileIndex.NAIP_INDEX_BLOB_ROOT + fn,
-                    os.path.join(base_path, fn),
-                    verbose,
-                )
-
-        self.base_path = base_path
-        self.tile_rtree = rtree.index.Index(base_path + "/tile_index")
-        self.tile_index = pickle.load(open(base_path + "/tiles.p", "rb"))
+        key = (
+            math.floor(x / NAIPTileIndex.CELL_SIZE),
+            math.floor(y / NAIPTileIndex.CELL_SIZE),
+        )
+        if key not in self.cells:
+            minx = key[0] * NAIPTileIndex.CELL_SIZE
+            miny = key[1] * NAIPTileIndex.CELL_SIZE
+            search = self.catalog.search(
+                collections=[NAIPTileIndex.COLLECTION],
+                bbox=[
+                    minx,
+                    miny,
+                    minx + NAIPTileIndex.CELL_SIZE,
+                    miny + NAIPTileIndex.CELL_SIZE,
+                ],
+                limit=1000,
+            )
+            urls = []
+            shapes = []
+            for item in search.items_as_dicts():
+                urls.append(item["assets"]["image"]["href"])
+                shapes.append(shapely.geometry.shape(item["geometry"]))
+            bounds = np.array([shape.bounds for shape in shapes]).reshape(-1, 4)
+            self.cells[key] = (urls, shapes, bounds)
+        return self.cells[key]
 
     def lookup_point(self, lat, lon):
         """Given a lat/lon pair, return the list of NAIP tiles that *contain* that point.
@@ -80,21 +91,25 @@ class NAIPTileIndex:
             IndexError: Raised if no tile within the index fully contains the given `geom`
         """
         shape = shapely.geometry.shape(geom)
-        intersected_indices = list(self.tile_rtree.intersection(shape.bounds))
 
-        intersected_files = []
-        tile_intersection = False
+        # Any tile that contains `shape` also contains this point, so it intersects the
+        # point's cell
+        point = shape.representative_point()
+        urls, shapes, bounds = self._get_cell(point.x, point.y)
 
-        for idx in intersected_indices:
-            intersected_file = self.tile_index[idx][0]
-            intersected_geom = self.tile_index[idx][1]
-            if intersected_geom.contains(shape):
-                tile_intersection = True
-                intersected_files.append(
-                    NAIPTileIndex.NAIP_BLOB_ROOT + intersected_file
-                )
+        minx, miny, maxx, maxy = shape.bounds
+        intersected_indices = np.flatnonzero(
+            (bounds[:, 0] <= maxx)
+            & (bounds[:, 1] <= maxy)
+            & (bounds[:, 2] >= minx)
+            & (bounds[:, 3] >= miny)
+        )
 
-        if not tile_intersection and len(intersected_indices) > 0:
+        intersected_files = [
+            urls[idx] for idx in intersected_indices if shapes[idx].contains(shape)
+        ]
+
+        if len(intersected_files) <= 0 and len(intersected_indices) > 0:
             raise IndexError(
                 "There are overlaps with tile index, but no tile contains the shape"
             )
@@ -102,30 +117,3 @@ class NAIPTileIndex:
             raise IndexError("No tile intersections")
         else:
             return intersected_files
-
-
-def download_url(url, output_fn, verbose=False):
-    """Download a URL to file.
-
-    Args:
-        url (str): URL of file to download
-        output_fn (str): Filename to save (not the directory to save the file to)
-        verbose (bool): Whether to print how the download is going
-
-    Returns:
-        output_fn (str): Return `output_fn` as is
-    """
-
-    if verbose:
-        print(
-            "Downloading file {} to {}".format(os.path.basename(url), output_fn), end=""
-        )
-
-    urllib.request.urlretrieve(url, output_fn)
-    assert os.path.isfile(output_fn)
-
-    if verbose:
-        nBytes = os.path.getsize(output_fn)
-        print("...done, {} bytes.".format(nBytes))
-
-    return output_fn
