@@ -23,6 +23,7 @@ import argparse
 import os
 import time
 from collections import defaultdict
+from urllib.parse import urlparse
 
 import fiona
 import fiona.transform
@@ -87,7 +88,12 @@ def main():
             prediction_geoms.append(row["geometry"])
             prediction_urls.append(row["properties"]["image_url"])
     for url in prediction_urls:
-        assert url.startswith("https://naipblobs.blob.core.windows.net")
+        parsed_url = urlparse(url)
+        if (
+            parsed_url.scheme != "https"
+            or parsed_url.hostname != "naipblobs.blob.core.windows.net"
+        ):
+            raise ValueError(f"Unexpected image URL: {url}")
 
     # Create a mapping between samples and imagery tiles. I.e. which samples belong to
     # which imagery tile. If we did not pre-compute this mapping, then this script would
